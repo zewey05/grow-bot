@@ -12,7 +12,7 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN")
 GROQ_KEY = os.environ.get("GROQ_KEY")
 SUPPORT_USERNAME = "zewey05"
 
-WHITELIST = {"zewey05"}
+WHITELIST = {""}
 
 CHEAT_CODES = {
     "Xk7mQ2nR",
