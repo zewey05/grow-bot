@@ -9,7 +9,7 @@ from groq import Groq
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 GROQ_KEY = os.environ.get("GROQ_KEY")
-SUPPORT_USERNAME = "zeweysfierstbot"  # замени на свой юз
+SUPPORT_USERNAME = "zewey05"
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
