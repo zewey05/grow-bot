@@ -4,11 +4,12 @@ import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, BotCommand
 from groq import Groq
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 GROQ_KEY = os.environ.get("GROQ_KEY")
+SUPPORT_USERNAME = "zeweysfierstbot"  # замени на свой юз
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
@@ -54,6 +55,15 @@ def get_keyboard():
         ]
     ])
 
+async def set_commands():
+    commands = [
+        BotCommand(command="start", description="Запустить бота"),
+        BotCommand(command="menu", description="Показать меню"),
+        BotCommand(command="support", description="Написать в поддержку"),
+        BotCommand(command="clear", description="Очистить историю"),
+    ]
+    await bot.set_my_commands(commands)
+
 @dp.message(Command("start"))
 async def start(message: types.Message):
     user_modes[message.from_user.id] = "chat"
@@ -61,6 +71,21 @@ async def start(message: types.Message):
     await message.answer(
         "Привет! Я мощный AI ассистент 🤖\n\nВыбери режим:",
         reply_markup=get_keyboard()
+    )
+
+@dp.message(Command("menu"))
+async def menu(message: types.Message):
+    await message.answer("Выбери режим:", reply_markup=get_keyboard())
+
+@dp.message(Command("clear"))
+async def clear(message: types.Message):
+    user_history[message.from_user.id] = []
+    await message.answer("История очищена! 🗑")
+
+@dp.message(Command("support"))
+async def support(message: types.Message):
+    await message.answer(
+        f"📩 Связаться с поддержкой:\n@{SUPPORT_USERNAME}\n\nОпишите вашу проблему и мы поможем!"
     )
 
 @dp.callback_query()
@@ -75,10 +100,6 @@ async def handle_callback(call: types.CallbackQuery):
         names = {"code": "💻 Код", "study": "📚 Учёба", "chat": "💬 Чат"}
         await call.answer(f"Режим: {names[mode]}")
     await call.message.edit_reply_markup(reply_markup=get_keyboard())
-
-@dp.message(Command("menu"))
-async def menu(message: types.Message):
-    await message.answer("Выбери режим:", reply_markup=get_keyboard())
 
 @dp.message()
 async def handle(message: types.Message):
@@ -119,6 +140,7 @@ def run_server():
     HTTPServer(("0.0.0.0", port), Handler).serve_forever()
 
 async def main():
+    await set_commands()
     threading.Thread(target=run_server, daemon=True).start()
     await dp.start_polling(bot)
 
