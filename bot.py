@@ -6,7 +6,6 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from groq import Groq
-import urllib.parse
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 GROQ_KEY = os.environ.get("GROQ_KEY")
@@ -40,8 +39,7 @@ MODES = {
 - Отвечай коротко и по делу
 - Будь дружелюбным и позитивным
 - Помогай с любыми вопросами
-Отвечай на русском.""",
-    "image": "image"
+Отвечай на русском."""
 }
 
 def get_keyboard():
@@ -49,10 +47,7 @@ def get_keyboard():
         [
             InlineKeyboardButton(text="💻 Код", callback_data="mode_code"),
             InlineKeyboardButton(text="📚 Учёба", callback_data="mode_study"),
-        ],
-        [
             InlineKeyboardButton(text="💬 Чат", callback_data="mode_chat"),
-            InlineKeyboardButton(text="🎨 Картинки", callback_data="mode_image"),
         ],
         [
             InlineKeyboardButton(text="🗑 Очистить историю", callback_data="clear")
@@ -77,15 +72,8 @@ async def handle_callback(call: types.CallbackQuery):
     elif call.data.startswith("mode_"):
         mode = call.data.replace("mode_", "")
         user_modes[uid] = mode
-        names = {
-            "code": "💻 Код",
-            "study": "📚 Учёба",
-            "chat": "💬 Чат",
-            "image": "🎨 Картинки"
-        }
+        names = {"code": "💻 Код", "study": "📚 Учёба", "chat": "💬 Чат"}
         await call.answer(f"Режим: {names[mode]}")
-        if mode == "image":
-            await call.message.answer("🎨 Режим картинок активен!\nПросто напиши что нарисовать, например: кот в космосе")
     await call.message.edit_reply_markup(reply_markup=get_keyboard())
 
 @dp.message(Command("menu"))
@@ -99,14 +87,6 @@ async def handle(message: types.Message):
         user_modes[uid] = "chat"
     if uid not in user_history:
         user_history[uid] = []
-
-    if user_modes[uid] == "image":
-        await bot.send_chat_action(message.chat.id, "upload_photo")
-        prompt = message.text
-        encoded = urllib.parse.quote(prompt)
-        url = f"https://image.pollinations.ai/prompt/{encoded}?width=512&height=512&nologo=true"
-        await bot.send_photo(message.chat.id, url, caption=f"🖼 {prompt}")
-        return
 
     user_history[uid].append({"role": "user", "content": message.text})
 
